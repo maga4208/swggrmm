@@ -11,6 +11,10 @@ targets:
     dependencies:
       - package: TDLibKit
         product: TDLibKit
+    settings:
+      # Эти строчки — самое важное. Они говорят Xcode, где искать библиотеки.
+      FRAMEWORK_SEARCH_PATHS: $(inherited) $(BUILD_DIR)/Release-iphoneos
+      HEADER_SEARCH_PATHS: $(inherited) $(BUILD_DIR)/Release-iphoneos/include
     info:
       path: SimpleIOSApp/Info.plist
       properties:
