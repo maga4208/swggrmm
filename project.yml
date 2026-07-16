@@ -1,0 +1,30 @@
+name: swggrmm
+options:
+  bundleIdPrefix: com.maga4208
+  deploymentTarget:
+    iOS: 13.0
+targets:
+  swggrmm:
+    type: application
+    platform: iOS
+    sources: [SimpleIOSApp]
+    dependencies:
+      - package: TDLibKit
+        product: TDLibKit
+    info:
+      path: SimpleIOSApp/Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleName: swggrmm
+        CFBundleDisplayName: swggrmm
+packages:
+  TDLibKit:
+    url: https://github.com/Swiftgram/TDLibKit
+    from: 1.5.2
