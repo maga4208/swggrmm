@@ -3,27 +3,24 @@ import TDLibKit
 
 class ViewController: UIViewController, UITextFieldDelegate {
 
-    // MARK: - UI Elements
+    // Это наши поля и кнопки
     private let phoneTextField = UITextField()
     private let codeTextField = UITextField()
     private let loginButton = UIButton(type: .system)
     private let statusLabel = UILabel()
 
+    // Переменные для запоминания, что мы уже попросили код
     private var isCodeRequested = false
     private var phoneNumber: String = ""
-    private var tdLibClient = TDLibClient.shared
 
-    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .white
         setupUI()
-        setupTDLib()
     }
 
-    // MARK: - Setup UI
+    // Рисуем экран (размещаем поля, кнопку и надпись)
     private func setupUI() {
-        // Настройка полей ввода и кнопки
         let stackView = UIStackView(arrangedSubviews: [phoneTextField, codeTextField, loginButton, statusLabel])
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -38,14 +35,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
         ])
 
-        phoneTextField.placeholder = "Введите номер телефона"
+        phoneTextField.placeholder = "Номер телефона (например, 79123456789)"
         phoneTextField.borderStyle = .roundedRect
         phoneTextField.keyboardType = .numberPad
         phoneTextField.delegate = self
 
-        codeTextField.placeholder = "Код подтверждения"
+        codeTextField.placeholder = "Код из Telegram"
         codeTextField.borderStyle = .roundedRect
-        codeTextField.isHidden = true
+        codeTextField.isHidden = true // Сначала скрыто
         codeTextField.keyboardType = .numberPad
         codeTextField.delegate = self
 
@@ -57,17 +54,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
         statusLabel.text = "Введите номер"
         statusLabel.textAlignment = .center
-        statusLabel.numberOfLines = 0
         statusLabel.textColor = .gray
     }
 
-    // MARK: - TDLib Setup
-    private func setupTDLib() {
-        // Устанавливаем API ID и HASH (публичные, можно использовать известные)
-        tdLibClient.setApiId(apiId: 2040, apiHash: "b18441a1ff607e10a989891a5462e627") // пример, можно заменить на свои
-    }
-
-    // MARK: - Actions
+    // Это действие когда нажимаешь кнопку "Войти"
     @objc private func loginAction() {
         guard let phone = phoneTextField.text, !phone.isEmpty else {
             statusLabel.text = "Введите номер"
@@ -75,50 +65,49 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
 
         if !isCodeRequested {
-            // Запрос кода
+            // Если код ещё не запрошен – запрашиваем
             phoneNumber = phone
-            tdLibClient.requestAuthCode(phoneNumber: phoneNumber) { [weak self] result in
+            TDLibClient.shared.requestAuthCode(phoneNumber: phoneNumber) { [weak self] result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
                         self?.isCodeRequested = true
                         self?.codeTextField.isHidden = false
                         self?.loginButton.setTitle("Подтвердить", for: .normal)
-                        self?.statusLabel.text = "Код отправлен"
+                        self?.statusLabel.text = "Код отправлен на твой номер"
                     case .failure(let error):
                         self?.statusLabel.text = "Ошибка: \(error.localizedDescription)"
                     }
                 }
             }
         } else {
-            // Подтверждение кода
+            // Если код уже запрошен – проверяем код
             guard let code = codeTextField.text, !code.isEmpty else {
-                statusLabel.text = "Введите код"
+                statusLabel.text = "Введи код"
                 return
             }
-            tdLibClient.checkAuthCode(code: code) { [weak self] result in
+            TDLibClient.shared.checkAuthCode(code: code) { [weak self] result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
-                        self?.statusLabel.text = "Авторизация успешна!"
-                        // Переход к списку чатов (пока заглушка)
-                        self?.showChats()
+                        self?.statusLabel.text = "🎉 Ты вошёл в Telegram!"
+                        self?.showSuccess()
                     case .failure(let error):
-                        self?.statusLabel.text = "Ошибка кода: \(error.localizedDescription)"
+                        self?.statusLabel.text = "Неверный код: \(error.localizedDescription)"
                     }
                 }
             }
         }
     }
 
-    private func showChats() {
-        // Пока просто алерт
-        let alert = UIAlertController(title: "Успех", message: "Вы вошли в Telegram", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+    // После входа показываем радостное сообщение (пока просто алерт)
+    private func showSuccess() {
+        let alert = UIAlertController(title: "Ура!", message: "Теперь ты в Telegram. Скоро тут будет список чатов.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ок", style: .default))
         present(alert, animated: true)
     }
 
-    // MARK: - UITextFieldDelegate
+    // Это чтобы клавиатура убиралась по нажатию "Готово"
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
