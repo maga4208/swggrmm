@@ -4,18 +4,9 @@ workflows:
     environment:
       xcode: latest
     scripts:
-      - name: Install xcodegen
-        script: |
-          brew install xcodegen
-      - name: Generate Xcode project
-        script: |
-          xcodegen generate
-      - name: Resolve package dependencies   # ← новый шаг
-        script: |
-          xcodebuild -resolvePackageDependencies -project swggrmm.xcodeproj -scheme swggrmm
       - name: Build app (unsigned)
         script: |
-          xcodebuild -project swggrmm.xcodeproj -scheme swggrmm -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO SYMROOT=build build
+          xcodebuild -scheme swggrmm -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO SYMROOT=build build
       - name: Create IPA
         script: |
           mkdir -p build/ios/ipa
