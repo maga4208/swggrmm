@@ -14,7 +14,6 @@ workflows:
         script: |
           xcode-project build-ipa \
             --project swggrmm.xcodeproj \
-            --scheme swggrmm \
-            --bundle-id com.maga4208.swggrmm
+            --scheme swggrmm
     artifacts:
       - build/ios/ipa/*.ipa
